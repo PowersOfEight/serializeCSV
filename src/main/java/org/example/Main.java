@@ -1,13 +1,6 @@
 package org.example;
 import edu.cofc.johnson.Example;
 
-import javax.swing.text.html.Option;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.InputMismatchException;
 import java.util.Optional;
 import java.util.Scanner;
@@ -118,6 +111,7 @@ public class Main {
         return validateUserSelection(input);
     }
 
+    //  TODO: Change to printToCSV
     public static void displayMenu() {
         for(int i = 0; i < MENU_OPTIONS.length; ++i) {
             System.out.printf("(%c)%8s%s\n",MENU_CHARS[i],"",MENU_OPTIONS[i]);

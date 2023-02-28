@@ -18,10 +18,17 @@ public class Example  {
     private static final int DATA_INDEX = 1;
     private static final int NAME_INDEX = 2;
     private static final int SYMBOL_INDEX = 3;
-    private final int id;
-    private final float data;
-    private final String name;
-    private final char symbol;
+    private int id;
+    private float data;
+    private String name;
+    private  char symbol;
+
+    public Example() {
+        this.id = 0;
+        this.name = "";
+        this.data = 0.0f;
+        this.symbol = ' ';
+    }
     public Example(int id,
                    float data,
                    String name,
@@ -41,6 +48,7 @@ public class Example  {
     }
 
     public float getData() {
+
         return data;
     }
 
@@ -48,6 +56,19 @@ public class Example  {
         return name;
     }
 
+    //  Setters
+    public void setId(int id) {
+        this.id = id;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setSymbol(char symbol) {
+        this.symbol = symbol;
+    }
+    public void setData(float data) {
+        this.data = data;
+    }
     public static boolean writeToFile(Example example, String pathToFile) {
         try(FileChannel channel = FileChannel.open(Paths.get(pathToFile),
                 StandardOpenOption.CREATE,
