@@ -1,10 +1,10 @@
 package edu.cofc.johnson;
 //  AUTHOR: James Daniel Johnson
 import java.io.*;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 /**
  * <h1>edu.cofc.johnson.Example</h1>
@@ -26,34 +26,18 @@ import java.nio.file.Paths;
  * </p>
  */
 public class Example implements Serializable  {
-    public static final String FILE_NAME = "example.ser";
+    public static final String BINARY_FILE_NAME = "example.ser";
     /**
      * For serializable implementation
      */
-    private static final long serialVersionUID = 1L;
+    // @Serial
+    // private static final long serialVersionUID = -295161158544973069;
+
     private int id;
     private float data;
     private String name;
     private  char symbol;
 
-    public static void main(String[] args) throws IOException{
-        //  Create the example
-        Example example = new Example();
-        example.setData(1.234f);
-        example.setId(8);
-        example.setName("Example");
-        example.setSymbol('@');
-        //  Write to file
-        Example.serialize(example);
-        Example readExample = Example.deserialize();
-        // Make sure examples are equal
-        assert(example.equals(readExample));
-        //  Clean up the file
-        Path path = Paths.get(FILE_NAME);
-        if (Files.exists(path) && Files.isRegularFile(path)) {
-            Files.delete(path);
-        }
-    }
 
     public Example() {
         this.id = 0;
@@ -102,15 +86,26 @@ public class Example implements Serializable  {
         this.data = data;
     }
 
-    public boolean equals(Example other) {
-        return (this.id == other.getId() &&
-                this.data == other.getData() &&
-                this.name.equals(other.getName()) &&
-                this.symbol == other.getSymbol());
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Example example = (Example) o;
+        return id == example.id && Float.compare(example.data, data) == 0 && symbol == example.symbol && name.equals(example.name);
     }
 
-    public static void serialize(Example example) {
-        Path outFile = Paths.get(FILE_NAME);
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, data, name, symbol);
+    }
+
+
+    /**
+     * Serializes the object to a binary file
+     * @param example The object to serialize
+     */
+    public static void serializeToBinary(Example example) {
+        Path outFile = Paths.get(BINARY_FILE_NAME);
         try (ObjectOutputStream stream =
                      new ObjectOutputStream(Files.newOutputStream(outFile))) {
             stream.writeObject(example);
@@ -119,8 +114,12 @@ public class Example implements Serializable  {
         }
     }
 
-    public static Example deserialize() {
-        Path inFile = Paths.get(FILE_NAME);
+    /**
+     *  Deserializes an object from a binary file
+      * @return The object deserialized from file
+     */
+    public static Example deserializeFromBinary() {
+        Path inFile = Paths.get(BINARY_FILE_NAME);
         Example example = new Example();
         try(ObjectInputStream stream =
                 new ObjectInputStream(Files.newInputStream(inFile))) {
@@ -129,6 +128,19 @@ public class Example implements Serializable  {
             ex.printStackTrace();
         }
         return example;
+    }
+
+    //  This is used to replace serialization as per Bowring
+    private void readObject(ObjectInputStream stream) throws IOException,
+            ClassNotFoundException {
+        stream.defaultReadObject();
+
+        ObjectStreamClass myObject = ObjectStreamClass.lookup(
+                Class.forName(Example.class.getCanonicalName()));
+        long theSUID = myObject.getSerialVersionUID();
+
+        System.err.println("Customized De-serialization of Baseline "
+                + theSUID);
     }
 }
 
