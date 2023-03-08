@@ -1,6 +1,11 @@
 package edu.cofc.johnson;
 //  AUTHOR: James Daniel Johnson
-import java.io.*;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -78,6 +83,12 @@ public class Example implements Serializable  {
         this.data = data;
     }
 
+    /**
+     * Returns true if the other object is not null, shares
+     * the same class, and all fields are equal
+     * @param o The other object to compare
+     * @return True if the other object is equal to this one, false if it is not
+     */
     @Override
     public boolean equals(Object o) {
         boolean equal = false;
@@ -99,6 +110,51 @@ public class Example implements Serializable  {
     public int hashCode() {
         return Objects.hash(id, data, name, symbol);
     }
+
+
+    /**
+     * Formats the instance into a comma separated value record.
+     * @return A string representing a comma separated value record
+     */
+    public String printToCSVRecord() {
+        return String.format("%d,%f,%s,%c%n",id,data,name,symbol);
+    }
+
+    /**
+     * Serializes the object into a comma separated value file
+     * @param example The object instance to be serialized into a file
+     * @param fileName The name of the file to serialize
+     */
+    public static void serializeToCSVFile(Example example, String fileName) {
+        Path path = Paths.get(fileName);
+        try (OutputStream stream = Files.newOutputStream(path)) {
+            stream.write(example.printToCSVRecord().getBytes());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Deserializes an object from a comma separated value file and returns it.
+     * If a file is not found, will return <code>null</code>.
+     * @param fileName The name of the comma separated value file to deserialize from
+     * @return An instance of an object if the file is found, or null
+     */
+    public static Example deserializeFromCSVFile(String fileName) {
+        Path path = Paths.get(fileName);
+        Example example = null;
+        try (InputStream stream = Files.newInputStream(path)) {
+            String[] record = new String(stream.readAllBytes()).split(",");
+            example = new Example(Integer.parseInt(record[0]),
+                    Float.parseFloat(record[1]),
+                    record[2],
+                    record[3].charAt(0));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return example;
+    }
+
 
 
     /**

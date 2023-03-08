@@ -49,4 +49,24 @@ class ExampleTest {
         assertNotSame(example, other);
         assertTrue(Files.deleteIfExists(path));
     }
+
+    @Test
+    void serializeToCSVFile() throws IOException{
+        final String FILE_NAME = "example.csv";
+        Path path = Paths.get(FILE_NAME);
+        Example example = new Example(
+                45678,
+                9.321f,
+                "qwerty",
+                'p'
+        );
+        Example.serializeToCSVFile(example, FILE_NAME);
+        assertTrue(Files.exists(path));
+        assertFalse(Files.isDirectory(path));
+        Example other = Example.deserializeFromCSVFile(FILE_NAME);
+        assertNotNull(other);
+        assertNotSame(example, other);
+        assertEquals(example, other);
+        assertTrue(Files.deleteIfExists(path));
+    }
 }
