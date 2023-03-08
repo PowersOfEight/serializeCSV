@@ -27,11 +27,6 @@ import java.util.Objects;
  */
 public class Example implements Serializable  {
     public static final String BINARY_FILE_NAME = "example.ser";
-    /**
-     * For serializable implementation
-     */
-    // @Serial
-    // private static final long serialVersionUID = -295161158544973069;
 
     private int id;
     private float data;
@@ -63,10 +58,7 @@ public class Example implements Serializable  {
         return symbol;
     }
 
-    public float getData() {
-
-        return data;
-    }
+    public float getData() { return data; }
 
     public String getName() {
         return name;
@@ -88,10 +80,19 @@ public class Example implements Serializable  {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Example example = (Example) o;
-        return id == example.id && Float.compare(example.data, data) == 0 && symbol == example.symbol && name.equals(example.name);
+        boolean equal = false;
+        if (this == o) {
+            equal = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            equal = false;
+        } else {
+            Example example = (Example) o;
+            equal = id == example.getId() &&
+                    Float.compare(example.getData(), data) == 0 &&
+                    symbol == example.getSymbol() &&
+                    name.equals(example.getName());
+        }
+        return equal;
     }
 
     @Override
@@ -104,10 +105,20 @@ public class Example implements Serializable  {
      * Serializes the object to a binary file
      * @param example The object to serialize
      */
-    public static void serializeToBinary(Example example) {
-        Path outFile = Paths.get(BINARY_FILE_NAME);
+    public static void serializeToBinaryFile(Example example) {
+        serializeToBinaryFile(example, BINARY_FILE_NAME);
+    }
+
+    /**
+     * Serializes the example object to binary file. Uses the name of the
+     * file provided in the second argument
+     * @param example The example object to serialize
+     * @param fileName The file to serialize the object to
+     */
+    public static void serializeToBinaryFile(Example example, String fileName) {
+        Path outFile = Paths.get(fileName);
         try (ObjectOutputStream stream =
-                     new ObjectOutputStream(Files.newOutputStream(outFile))) {
+                new ObjectOutputStream(Files.newOutputStream(outFile))) {
             stream.writeObject(example);
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -115,13 +126,15 @@ public class Example implements Serializable  {
     }
 
     /**
-     *  Deserializes an object from a binary file
-      * @return The object deserialized from file
+     * Deserializes the stored object from a binary file.  Uses the name
+     * of the file provided in the second argument
+     * @param fileName The name of the file to deserialize from
+     * @return An instance of the example class from the file, or <code>null</code>
      */
-    public static Example deserializeFromBinary() {
-        Path inFile = Paths.get(BINARY_FILE_NAME);
-        Example example = new Example();
-        try(ObjectInputStream stream =
+    public static Example deserializeFromBinaryFile(String fileName) {
+        Path inFile = Paths.get(fileName);
+        Example example = null;
+        try (ObjectInputStream stream =
                 new ObjectInputStream(Files.newInputStream(inFile))) {
             example = (Example) stream.readObject();
         } catch (IOException | ClassNotFoundException ex) {
@@ -129,18 +142,14 @@ public class Example implements Serializable  {
         }
         return example;
     }
-
-    //  This is used to replace serialization as per Bowring
-    private void readObject(ObjectInputStream stream) throws IOException,
-            ClassNotFoundException {
-        stream.defaultReadObject();
-
-        ObjectStreamClass myObject = ObjectStreamClass.lookup(
-                Class.forName(Example.class.getCanonicalName()));
-        long theSUID = myObject.getSerialVersionUID();
-
-        System.err.println("Customized De-serialization of Baseline "
-                + theSUID);
+    /**
+     *  Deserializes an object from the default file
+      * @return The object deserialized from the default file
+     */
+    public static Example deserializeFromBinaryFile() {
+        return Example.deserializeFromBinaryFile(BINARY_FILE_NAME);
     }
+
+
 }
 
