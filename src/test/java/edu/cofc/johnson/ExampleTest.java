@@ -1,13 +1,13 @@
 package edu.cofc.johnson;
 
+import edu.cofc.johnson.example.Example;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ExampleTest {
 
@@ -21,14 +21,14 @@ class ExampleTest {
         );
         Example.serializeToBinaryFile(example);
         //  Check that the file name created
-        assertTrue(Files.exists(Paths.get(Example.BINARY_FILE_NAME)));
-        assertFalse(Files.isDirectory(Paths.get(Example.BINARY_FILE_NAME)));
+        Assertions.assertTrue(Files.exists(Paths.get(Example.BINARY_FILE_NAME)));
+        Assertions.assertFalse(Files.isDirectory(Paths.get(Example.BINARY_FILE_NAME)));
         //  Deserialize another instance and compare them
         Example other = Example.deserializeFromBinaryFile();
-        assertEquals(example, other);
-        assertNotSame(example, other);
+        Assertions.assertEquals(example, other);
+        Assertions.assertNotSame(example, other);
         //  Destroy the file
-        assertTrue(Files.deleteIfExists(Paths.get(Example.BINARY_FILE_NAME)));
+        Assertions.assertTrue(Files.deleteIfExists(Paths.get(Example.BINARY_FILE_NAME)));
     }
 
     @Test
@@ -42,12 +42,12 @@ class ExampleTest {
                 'Z'
         );
         Example.serializeToBinaryFile(example, FILE_NAME);
-        assertTrue(Files.exists(path));
-        assertFalse(Files.isDirectory(path));
+        Assertions.assertTrue(Files.exists(path));
+        Assertions.assertFalse(Files.isDirectory(path));
         Example other = Example.deserializeFromBinaryFile(FILE_NAME);
-        assertEquals(example, other);
-        assertNotSame(example, other);
-        assertTrue(Files.deleteIfExists(path));
+        Assertions.assertEquals(example, other);
+        Assertions.assertNotSame(example, other);
+        Assertions.assertTrue(Files.deleteIfExists(path));
     }
 
     @Test
@@ -61,12 +61,12 @@ class ExampleTest {
                 'p'
         );
         Example.serializeToCSVFile(example, FILE_NAME);
-        assertTrue(Files.exists(path));
-        assertFalse(Files.isDirectory(path));
+        Assertions.assertTrue(Files.exists(path));
+        Assertions.assertFalse(Files.isDirectory(path));
         Example other = Example.deserializeFromCSVFile(FILE_NAME);
-        assertNotNull(other);
-        assertNotSame(example, other);
-        assertEquals(example, other);
-        assertTrue(Files.deleteIfExists(path));
+        Assertions.assertNotNull(other);
+        Assertions.assertNotSame(example, other);
+        Assertions.assertEquals(example, other);
+        Assertions.assertTrue(Files.deleteIfExists(path));
     }
 }

@@ -1,5 +1,4 @@
-package edu.cofc.johnson;
-//  AUTHOR: James Daniel Johnson
+package edu.cofc.johnson.example;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,22 +23,20 @@ import java.util.Objects;
  *      Java.io.Serializable documentation
  *  </a><br/>
  * </p>
+ * @author James Daniel Johnson
  */
 public class Example implements Serializable  {
+    @Serial
+    private static final long serialVersionUID =  6995375697756630868L;
     public static final String BINARY_FILE_NAME = "example.ser";
 
-    private int id;
-    private float data;
-    private String name;
-    private  char symbol;
+    private final int id;
+    private final float data;
+    private final String name;
+    private final char symbol;
 
 
-    public Example() {
-        this.id = 0;
-        this.name = "";
-        this.data = 0.0f;
-        this.symbol = ' ';
-    }
+
     public Example(int id,
                    float data,
                    String name,
@@ -64,19 +61,6 @@ public class Example implements Serializable  {
         return name;
     }
 
-    //  Setters
-    public void setId(int id) {
-        this.id = id;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public void setSymbol(char symbol) {
-        this.symbol = symbol;
-    }
-    public void setData(float data) {
-        this.data = data;
-    }
 
     /**
      * Returns true if the other object is not null, shares
@@ -201,17 +185,5 @@ public class Example implements Serializable  {
         return Example.deserializeFromBinaryFile(BINARY_FILE_NAME);
     }
 
-    //  This is used to replace serialization as per Bowring
-    private void readObject(ObjectInputStream stream) throws IOException,
-            ClassNotFoundException {
-        stream.defaultReadObject();
-
-        ObjectStreamClass myObject = ObjectStreamClass.lookup(
-                Class.forName(Example.class.getCanonicalName()));
-        long theSUID = myObject.getSerialVersionUID();
-
-        System.err.println("Customized De-serialization of Baseline "
-                + theSUID);
-    }
 }
 
