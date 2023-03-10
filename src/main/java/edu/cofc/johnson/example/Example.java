@@ -1,11 +1,6 @@
 package edu.cofc.johnson;
 //  AUTHOR: James Daniel Johnson
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -86,18 +81,18 @@ public class Example implements Serializable  {
     /**
      * Returns true if the other object is not null, shares
      * the same class, and all fields are equal
-     * @param o The other object to compare
+     * @param other The other object to compare
      * @return True if the other object is equal to this one, false if it is not
      */
     @Override
-    public boolean equals(Object o) {
-        boolean equal = false;
-        if (this == o) {
+    public boolean equals(Object other) {
+        boolean equal;
+        if (this == other) {
             equal = true;
-        } else if (o == null || getClass() != o.getClass()) {
+        } else if (other == null || getClass() != other.getClass()) {
             equal = false;
         } else {
-            Example example = (Example) o;
+            Example example = (Example) other;
             equal = id == example.getId() &&
                     Float.compare(example.getData(), data) == 0 &&
                     symbol == example.getSymbol() &&
@@ -172,7 +167,7 @@ public class Example implements Serializable  {
      * @param fileName The file to serialize the object to
      */
     public static void serializeToBinaryFile(Example example, String fileName) {
-        Path outFile = Paths.get(fileName);
+        Path outFile = Paths.get(fileName);// Do this for Object instead of Example
         try (ObjectOutputStream stream =
                 new ObjectOutputStream(Files.newOutputStream(outFile))) {
             stream.writeObject(example);
@@ -206,6 +201,17 @@ public class Example implements Serializable  {
         return Example.deserializeFromBinaryFile(BINARY_FILE_NAME);
     }
 
+    //  This is used to replace serialization as per Bowring
+    private void readObject(ObjectInputStream stream) throws IOException,
+            ClassNotFoundException {
+        stream.defaultReadObject();
 
+        ObjectStreamClass myObject = ObjectStreamClass.lookup(
+                Class.forName(Example.class.getCanonicalName()));
+        long theSUID = myObject.getSerialVersionUID();
+
+        System.err.println("Customized De-serialization of Baseline "
+                + theSUID);
+    }
 }
 
