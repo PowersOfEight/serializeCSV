@@ -1,4 +1,10 @@
 package edu.cofc.johnson.example;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import com.thoughtworks.xstream.security.PrimitiveTypePermission;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,14 +31,19 @@ import java.util.Objects;
  * </p>
  * @author James Daniel Johnson
  */
+@XStreamAlias("example")
 public class Example implements Serializable  {
+    @XStreamOmitField
     @Serial
     private static final long serialVersionUID =  6995375697756630868L;
-    public static final String BINARY_FILE_NAME = "example.ser";
 
+    @XStreamAlias("id")
     private final int id;
+    @XStreamAlias("data")
     private final float data;
+    @XStreamAlias("name")
     private final String name;
+    @XStreamAlias("symbol")
     private final char symbol;
 
 
@@ -134,55 +145,25 @@ public class Example implements Serializable  {
         return example;
     }
 
-
-
-    /**
-     * Serializes the object to a binary file
-     * @param example The object to serialize
-     */
-    public static void serializeToBinaryFile(Example example) {
-        serializeToBinaryFile(example, BINARY_FILE_NAME);
+    public static void serializeToXML(Example example, String fileName)
+            throws IOException, XStreamException {
+        XStream xStream = new XStream();
+        OutputStream stream =
+                Files.newOutputStream(Paths.get(fileName));
+        stream.write(xStream.toXML(example).getBytes());
+        stream.close();
     }
 
-    /**
-     * Serializes the example object to binary file. Uses the name of the
-     * file provided in the second argument
-     * @param example The example object to serialize
-     * @param fileName The file to serialize the object to
-     */
-    public static void serializeToBinaryFile(Example example, String fileName) {
-        Path outFile = Paths.get(fileName);// Do this for Object instead of Example
-        try (ObjectOutputStream stream =
-                new ObjectOutputStream(Files.newOutputStream(outFile))) {
-            stream.writeObject(example);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /**
-     * Deserializes the stored object from a binary file.  Uses the name
-     * of the file provided in the second argument
-     * @param fileName The name of the file to deserialize from
-     * @return An instance of the example class from the file, or <code>null</code>
-     */
-    public static Example deserializeFromBinaryFile(String fileName) {
-        Path inFile = Paths.get(fileName);
-        Example example = null;
-        try (ObjectInputStream stream =
-                new ObjectInputStream(Files.newInputStream(inFile))) {
-            example = (Example) stream.readObject();
-        } catch (IOException | ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }
+    public static Example deserializeFromXML(String fileName)
+        throws IOException, XStreamException {
+        InputStream stream =
+                Files.newInputStream(Paths.get(fileName));
+        XStream xStream = new XStream();
+        xStream.allowTypesByWildcard(new String[]{"edu.cofc.johnson.**"});
+//        xStream.addPermission(PrimitiveTypePermission.PRIMITIVES);
+        xStream.processAnnotations(Example.class);
+        Example example = (Example) xStream.fromXML(stream);
         return example;
-    }
-    /**
-     *  Deserializes an object from the default file
-      * @return The object deserialized from the default file
-     */
-    public static Example deserializeFromBinaryFile() {
-        return Example.deserializeFromBinaryFile(BINARY_FILE_NAME);
     }
 
 }
