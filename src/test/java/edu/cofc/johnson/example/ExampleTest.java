@@ -1,7 +1,8 @@
-package edu.cofc.johnson;
+package edu.cofc.johnson.example;
 
-import edu.cofc.johnson.example.Example;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -11,48 +12,23 @@ import java.nio.file.Paths;
 
 class ExampleTest {
 
-    @Test
-    void serializeToBinary() throws IOException {
-        Example example = new Example(
-                123456789,
-                1.234f,
-                "abcdefg",
-                'A'
-        );
-        Example.serializeToBinaryFile(example);
-        //  Check that the file name created
-        Assertions.assertTrue(Files.exists(Paths.get(Example.BINARY_FILE_NAME)));
-        Assertions.assertFalse(Files.isDirectory(Paths.get(Example.BINARY_FILE_NAME)));
-        //  Deserialize another instance and compare them
-        Example other = Example.deserializeFromBinaryFile();
-        Assertions.assertEquals(example, other);
-        Assertions.assertNotSame(example, other);
-        //  Destroy the file
-        Assertions.assertTrue(Files.deleteIfExists(Paths.get(Example.BINARY_FILE_NAME)));
+    String testFileName;
+    String fileExtension;// NOTE: set this each test for the given test
+    @BeforeEach
+    void setUp() {
+        String filePrefix = "testFile";
+        testFileName = String.format("%s",filePrefix);
+        int count = 0;
+        //  Determine if this file exists in the user's system
+        //  If it does, mutate the name until an unused name is found
+        while (Files.exists(Paths.get(testFileName))) {
+            testFileName = String.format("%s%d", filePrefix, count++);
+        }
     }
-
-    @Test
-    void serializeToBinaryFile() throws IOException {
-        final String FILE_NAME = "example.ser";
-        Path path = Paths.get(FILE_NAME);
-        Example example = new Example(
-                54321,
-                4.321f,
-                "hijklmnop",
-                'Z'
-        );
-        Example.serializeToBinaryFile(example, FILE_NAME);
-        Assertions.assertTrue(Files.exists(path));
-        Assertions.assertFalse(Files.isDirectory(path));
-        Example other = Example.deserializeFromBinaryFile(FILE_NAME);
-        Assertions.assertEquals(example, other);
-        Assertions.assertNotSame(example, other);
-        Assertions.assertTrue(Files.deleteIfExists(path));
-    }
-
     @Test
     void serializeToCSVFile() throws IOException{
-        final String FILE_NAME = "example.csv";
+        fileExtension = ".csv";
+        final String FILE_NAME = testFileName + fileExtension;
         Path path = Paths.get(FILE_NAME);
         Example example = new Example(
                 45678,
@@ -67,6 +43,29 @@ class ExampleTest {
         Assertions.assertNotNull(other);
         Assertions.assertNotSame(example, other);
         Assertions.assertEquals(example, other);
-        Assertions.assertTrue(Files.deleteIfExists(path));
     }
+
+    @Test
+    void serializeToXMLFile() throws IOException {
+        fileExtension =  ".xml";
+        final String FILE_NAME = testFileName + fileExtension;
+        Path path = Paths.get(FILE_NAME);
+        Example example = new Example(1029,
+                5.876f,
+                "146ef1",
+                'U');
+        Example.serializeToXML(example, FILE_NAME);
+        Assertions.assertTrue(Files.exists(path));
+        Assertions.assertFalse(Files.isDirectory(path));
+        Example other = Example.deserializeFromXML(FILE_NAME);
+        Assertions.assertNotNull(other);
+        Assertions.assertNotSame(example, other);
+        Assertions.assertEquals(example, other);
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(Paths.get(testFileName + fileExtension));
+    }
+
 }

@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BinarySerializationEngineTest {
 
-    String testFileName;
+    private String testFileName;
     @BeforeEach
     void setUp() {
         String filePrefix = "testBinaryFile";

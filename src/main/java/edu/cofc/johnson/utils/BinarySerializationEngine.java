@@ -12,6 +12,7 @@ import java.nio.file.Paths;
  * <p>
  * This class holds static methods to serialize and deserialize
  * objects in files.
+ * </p>
  * @author James Daniel Johnson
  */
 public class BinarySerializationEngine {

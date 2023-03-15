@@ -37,13 +37,10 @@ public class Example implements Serializable  {
     @Serial
     private static final long serialVersionUID =  6995375697756630868L;
 
-    @XStreamAlias("id")
+
     private final int id;
-    @XStreamAlias("data")
     private final float data;
-    @XStreamAlias("name")
     private final String name;
-    @XStreamAlias("symbol")
     private final char symbol;
 
 
@@ -115,13 +112,12 @@ public class Example implements Serializable  {
      * @param example The object instance to be serialized into a file
      * @param fileName The name of the file to serialize
      */
-    public static void serializeToCSVFile(Example example, String fileName) {
+    public static void serializeToCSVFile(Example example, String fileName)
+        throws IOException {
         Path path = Paths.get(fileName);
-        try (OutputStream stream = Files.newOutputStream(path)) {
-            stream.write(example.printToCSVRecord().getBytes());
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        OutputStream stream = Files.newOutputStream(path);
+        stream.write(example.printToCSVRecord().getBytes());
+        stream.close();
     }
 
     /**
@@ -129,38 +125,61 @@ public class Example implements Serializable  {
      * If a file is not found, will return <code>null</code>.
      * @param fileName The name of the comma separated value file to deserialize from
      * @return An instance of an object if the file is found, or null
+     * @throws IOException If the file doesn't exist or can't be opened
      */
-    public static Example deserializeFromCSVFile(String fileName) {
+    public static Example deserializeFromCSVFile(String fileName)
+        throws IOException {
         Path path = Paths.get(fileName);
         Example example = null;
-        try (InputStream stream = Files.newInputStream(path)) {
-            String[] record = new String(stream.readAllBytes()).split(",");
-            example = new Example(Integer.parseInt(record[0]),
-                    Float.parseFloat(record[1]),
-                    record[2],
-                    record[3].charAt(0));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        InputStream stream = Files.newInputStream(path);
+        String[] record = new String(stream.readAllBytes()).split(",");
+        stream.close();
+        example = new Example(Integer.parseInt(record[0]),
+               Float.parseFloat(record[1]),
+               record[2],
+               record[3].charAt(0));
         return example;
     }
 
+    /**
+     * <p>
+     *     Serializes the example to an XML file.<br/>
+     *     <a href="https://www.baeldung.com/xstream-serialize-object-to-xml">
+     *         Serializing an object to XML with XStream</a>
+     * </p>
+     * @param example The example object to serialize
+     * @param fileName The name of the file to serialize the object to
+     * @throws IOException If the event of a problem creating or writing the file
+     * @throws XStreamException If there is a problem with the xml encoding
+     */
     public static void serializeToXML(Example example, String fileName)
             throws IOException, XStreamException {
         XStream xStream = new XStream();
+        xStream.processAnnotations(Example.class);
         OutputStream stream =
                 Files.newOutputStream(Paths.get(fileName));
         stream.write(xStream.toXML(example).getBytes());
         stream.close();
     }
 
+    /**
+     * <p>
+     *      Deserializes and returns an instance of <code>Example</code> from
+     *      the given file.<br/>
+     *      <a href="https://www.baeldung.com/xstream-deserialize-xml-to-object">
+     *          Deserializing an object from XML using XStream</a>
+     * </p>
+     * @param fileName The name of the file to deserialize from
+     * @return A deserialized instance of the <code>Example</code> class
+     * @throws IOException If the file doesn't exist or cannot be opened
+     * @throws XStreamException If there is a problem parsing the XML
+     */
     public static Example deserializeFromXML(String fileName)
         throws IOException, XStreamException {
         InputStream stream =
                 Files.newInputStream(Paths.get(fileName));
         XStream xStream = new XStream();
         xStream.allowTypesByWildcard(new String[]{"edu.cofc.johnson.**"});
-//        xStream.addPermission(PrimitiveTypePermission.PRIMITIVES);
         xStream.processAnnotations(Example.class);
         Example example = (Example) xStream.fromXML(stream);
         return example;
