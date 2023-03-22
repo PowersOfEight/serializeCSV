@@ -1,13 +1,5 @@
 plugins{
-   id "application"
-}
-apply plugin : "java"
-ext {
-    javaMainClass = "edu.cofc.johnson.cli.MainClass"
-}
-
-application {
-    mainClassName = javaMainClass
+   id "java"
 }
 
 group 'edu.cofc.johnson'
@@ -25,4 +17,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+task runCLI(type: JavaExec) {
+    group = "Execution"
+    description = "Run the program from the command line"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "edu.cofc.johnson.cli.MainClass"
 }
